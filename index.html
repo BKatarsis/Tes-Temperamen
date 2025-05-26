@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Tes Temperamen ala Hippocrates</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap');
+  body {
+    margin: 0;
+    font-family: 'Poppins', sans-serif;
+    background: #f9fafb;
+    color: #333;
+  }
+  header {
+    background: linear-gradient(135deg, #a7c7e7, #d8c3a5);
+    padding: 2rem;
+    text-align: center;
+    color: #444;
+    font-weight: 600;
+    font-size: 1.8rem;
+    letter-spacing: 0.05em;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    user-select: none;
+  }
+  main {
+    max-width: 900px;
+    margin: 2rem auto 5rem;
+    background: #fff;
+    border-radius: 12px;
+    padding: 2rem;
+    box-shadow: 0 10px 30px rgba(167, 199, 231, 0.3);
+  }
+  .question {
+    margin-bottom: 1.5rem;
+  }
+  .question p {
+    margin-bottom: 0.8rem;
+    font-weight: 600;
+    color: #444;
+  }
+  .options {
+    display: flex;
+    gap: 1rem;
+    justify-content: space-between;
+  }
+  label {
+    cursor: pointer;
+    user-select: none;
+    flex: 1;
+    text-align: center;
+    background: #f3f4f6;
+    padding: 0.5rem 0.3rem;
+    border-radius: 8px;
+    transition: background 0.3s ease, box-shadow 0.3s ease;
+    border: 2px solid transparent;
+    font-size: 0.95rem;
+  }
+  input[type="radio"] {
+    display: none;
+  }
+  input[type="radio"]:checked + label {
+    background: #a7c7e7;
+    color: white;
+    box-shadow: 0 0 12px #7ea2d6;
+    border-color: #5a8bd8;
+  }
+  input[type="radio"]:focus + label {
+    outline: 2px solid #a7c7e7;
+  }
+  /* Animations on label press */
+  label:active {
+    transform: scale(0.95);
+    transition: transform 0.1s ease;
+  }
+  #submit-btn {
+    display: block;
+    margin: 3rem auto 0;
+    padding: 0.7rem 2.5rem;
+    background: #d8c3a5;
+    border: none;
+    border-radius: 20px;
+    color: #4a403a;
+    font-weight: 700;
+    font-size: 1.1rem;
+    letter-spacing: 0.05em;
+    cursor: pointer;
+    box-shadow: 0 6px 15px rgba(216, 195, 165, 0.6);
+    transition: background 0.4s ease, box-shadow 0.4s ease;
+    user-select: none;
+  }
+  #submit-btn:hover {
+    background: #cbb09a;
+    box-shadow: 0 8px 20px rgba(203, 176, 154, 0.9);
+  }
+  #submit-btn:active {
+    transform: scale(0.95);
+    transition: transform 0.1s ease;
+  }
+  #result {
+    margin-top: 3rem;
+    background: #f7f9f9;
+    border-radius: 12px;
+    padding: 2rem;
+    box-shadow: 0 4px 15px rgba(167, 199, 231, 0.4);
+    display: none;
+  }
+  #result h2 {
+    text-align: center;
+    color: #4a403a;
+    font-weight: 700;
+    margin-bottom: 1rem;
+    letter-spacing: 0.08em;
+  }
+  #result .score {
+    font-size: 1.2rem;
+    margin: 0.8rem 0;
+    color: #665544;
+  }
+  #summary {
+    margin-top: 1rem;
+    font-size: 1.05rem;
+    line-height: 1.5;
+    color: #5a4a3c;
+  }
+  /* Responsive adjustments */
+  @media (max-width: 600px) {
+    .options {
+      flex-direction: column;
+    }
+    label {
+      flex: none;
+      margin-bottom: 0.5rem;
+    }
+  }
+</style>
+</head>
+<body>
+<header>Tes Temperamen ala Hippocrates</header>
+<main>
+  <form id="personalityForm" novalidate>
+    <!-- Questions will be inserted by JS -->
+  </form>
+  <button id="submit-btn" type="button">Lihat Hasil</button>
+  <section id="result" aria-live="polite" aria-atomic="true">
+    <h2>Hasil Tes Kepribadian Anda</h2>
+    <p class="score" id="scoreSanguinis"></p>
+    <p class="score" id="scoreKoleris"></p>
+    <p class="score" id="scoreMelankolis"></p>
+    <p class="score" id="scorePlegmatis"></p>
+    <div id="summary"></div>
+  </section>
+</main>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const statements = [
+    // Sanguinis (S)
+    { text: "Saya suka bergaul dan mudah berteman dengan orang baru.", type: "S" },
+    { text: "Saya merasa nyaman menjadi pusat perhatian dalam sebuah kelompok.", type: "S" },
+    { text: "Saya sering mengekspresikan perasaan saya secara terbuka.", type: "S" },
+    { text: "Saya menikmati kegiatan yang melibatkan banyak orang dan kegembiraan.", type: "S" },
+    { text: "Saya mudah beradaptasi dan tidak terlalu memikirkan hal-hal kecil.", type: "S" },
+    { text: "Saya suka berbicara dan membuat orang lain tertawa.", type: "S" },
+    { text: "Saya cenderung optimis dan penuh semangat dalam menghadapi tantangan.", type: "S" },
+    { text: "Saya senang mencoba hal baru dan spontan.", type: "S" },
+    { text: "Saya merasa termotivasi ketika dikelilingi oleh suasana yang ramai dan hidup.", type: "S" },
+    { text: "Saya orang yang ekspresif dan ceria dalam kehidupan sehari-hari.", type: "S" },
+
+    // Koleris (K)
+    { text: "Saya suka memimpin dan mengarahkan orang lain.", type: "K" },
+    { text: "Saya mudah mengambil keputusan dengan cepat dan tegas.", type: "K" },
+    { text: "Saya berfokus pada pencapaian tujuan dan hasil yang nyata.", type: "K" },
+    { text: "Saya merasa tidak nyaman bila tidak bisa mengendalikan situasi.", type: "K" },
+    { text: "Saya cenderung kompetitif dan suka tantangan.", type: "K" },
+    { text: "Saya suka mengambil risiko untuk mencapai keberhasilan.", type: "K" },
+    { text: "Saya tidak suka membuang waktu dan lebih suka efisiensi.", type: "K" },
+    { text: "Saya suka bekerja secara mandiri dan tidak suka diganggu.", type: "K" },
+    { text: "Saya cenderung tegas dalam pendapat dan tidak mudah dipengaruhi.", type: "K" },
+    { text: "Saya selalu berusaha menjadi yang terbaik dalam apa yang saya lakukan.", type: "K" },
+
+    // Melankolis (M)
+    { text: "Saya orang yang sangat detail dan teliti dalam pekerjaan saya.", type: "M" },
+    { text: "Saya cenderung perfeksionis dan ingin segala sesuatu berjalan sempurna.", type: "M" },
+    { text: "Saya suka merencanakan segala sesuatu dengan matang sebelum melakukan tindakan.", type: "M" },
+    { text: "Saya mudah merasa khawatir jika ada sesuatu yang tidak sesuai harapan.", type: "M" },
+    { text: "Saya sering merenung dan memikirkan hal-hal secara mendalam.", type: "M" },
+    { text: "Saya lebih suka suasana yang tenang dan teratur.", type: "M" },
+    { text: "Saya cenderung pendiam dan lebih suka mendengarkan daripada berbicara.", type: "M" },
+    { text: "Saya menerima kritik dengan serius dan berusaha memperbaiki diri.", type: "M" },
+    { text: "Saya berorientasi pada nilai dan prinsip yang kuat dalam hidup.", type: "M" },
+    { text: "Saya mudah merasa sedih atau tersentuh oleh kejadian di sekitar saya.", type: "M" },
+
+    // Plegmatis (P)
+    { text: "Saya orang yang sabar dan jarang terbawa emosi.", type: "P" },
+    { text: "Saya lebih suka menghindari konflik dan mencari perdamaian.", type: "P" },
+    { text: "Saya mudah berempati dan peduli terhadap perasaan orang lain.", type: "P" },
+    { text: "Saya tidak suka terburu-buru dan cenderung santai dalam menjalani hidup.", type: "P" },
+    { text: "Saya senang bekerja sama dan menjadi pendamai di antara teman.", type: "P" },
+    { text: "Saya cenderung konsisten dan dapat dipercaya dalam tanggung jawab saya.", type: "P" },
+    { text: "Saya suka membantu tanpa mengharapkan imbalan atau pengakuan.", type: "P" },
+    { text: "Saya jarang merasa marah dan selalu mencari solusi yang masuk akal.", type: "P" },
+    { text: "Saya menghargai rutinitas dan suasana yang nyaman.", type: "P" },
+    { text: "Saya lebih suka menunda keputusan jika belum yakin sepenuhnya.", type: "P" }
+  ];
+
+  const scaleLabels = [
+    "Sangat Tidak Setuju",
+    "Tidak Setuju",
+    "Netral",
+    "Setuju",
+    "Sangat Setuju"
+  ];
+
+  const form = document.getElementById('personalityForm');
+
+  // Render questions and scale inputs
+  statements.forEach((item, idx) => {
+    const qDiv = document.createElement('div');
+    qDiv.classList.add('question');
+
+    const p = document.createElement('p');
+    p.textContent = (idx + 1) + ". " + item.text;
+    qDiv.appendChild(p);
+
+    const optionsDiv = document.createElement('div');
+    optionsDiv.classList.add('options');
+
+    scaleLabels.forEach((label, i) => {
+      const id = `q${idx}_opt${i+1}`;
+      const input = document.createElement('input');
+      input.type = "radio";
+      input.name = `q${idx}`;
+      input.value = i + 1;
+      input.id = id;
+      
+      const labelEl = document.createElement('label');
+      labelEl.htmlFor = id;
+      labelEl.textContent = label;
+
+      optionsDiv.appendChild(input);
+      optionsDiv.appendChild(labelEl);
+    });
+
+    qDiv.appendChild(optionsDiv);
+
+    form.appendChild(qDiv);
+  });
+
+  const submitBtn = document.getElementById('submit-btn');
+  const resultSection = document.getElementById('result');
+  const scoreSanguinis = document.getElementById('scoreSanguinis');
+  const scoreKoleris = document.getElementById('scoreKoleris');
+  const scoreMelankolis = document.getElementById('scoreMelankolis');
+  const scorePlegmatis = document.getElementById('scorePlegmatis');
+  const summary = document.getElementById('summary');
+
+  function animateButton(button) {
+    button.style.transform = 'scale(0.95)';
+    setTimeout(() => button.style.transform = 'scale(1)', 150);
+  }
+
+  function calculateResults() {
+    // Check all questions answered
+    for(let i=0; i<statements.length; i++){
+      const radios = document.getElementsByName('q'+i);
+      if (![...radios].some(r=>r.checked)) {
+        alert(`Harap jawab pertanyaan nomor ${i+1} terlebih dahulu.`);
+        return null;
+      }
+    }
+
+    let score = { S: 0, K: 0, M: 0, P: 0 };
+    for(let i=0; i<statements.length; i++) {
+      const radios = document.getElementsByName('q'+i);
+      let val;
+      for(const r of radios){
+        if(r.checked) val = parseInt(r.value);
+      }
+      score[statements[i].type] += val;
+    }
+    return score;
+  }
+
+  function interpretResults(score) {
+    // Determine highest temperament(s)
+    const entries = Object.entries(score);
+    let maxScore = Math.max(...entries.map(e => e[1]));
+    let types = entries.filter(e => e[1] === maxScore).map(e => e[0]);
+
+    // Detailed descriptions for each temperament type
+    let detailedDescriptions = {
+      S: `
+        <h3>Sanguinis</h3>
+        <p>Orang sanguinis adalah pribadi yang ceria, ramah, dan energik. Mereka suka bergaul, mudah beradaptasi, dan cenderung optimis. Sanguinis senang menjadi pusat perhatian dan mengekspresikan perasaan secara terbuka. Namun, mereka bisa kurang fokus dan kadang impulsif.</p>
+        <ul>
+          <li><strong>Kelebihan:</strong> Sociable, kreatif, penuh semangat.</li>
+          <li><strong>Kekurangan:</strong> Mudah bosan, kurang teratur, cenderung mudah terganggu.</li>
+        </ul>
+      `,
+      K: `
+        <h3>Koleris</h3>
+        <p>Tipe koleris dikenal sebagai pemimpin yang tegas, ulet, dan berorientasi tujuan. Mereka suka mengambil keputusan cepat, kompetitif, dan menyukai tantangan. Koleris dapat berperan dominan dan suka mengontrol situasi. Namun, mereka bisa keras kepala dan kurang sabar.</p>
+        <ul>
+          <li><strong>Kelebihan:</strong> Determined, energik, penuh inisiatif.</li>
+          <li><strong>Kekurangan:</strong> Sering kurang toleransi, dominan, bisa kurang peka terhadap perasaan orang lain.</li>
+        </ul>
+      `,
+      M: `
+        <h3>Melankolis</h3>
+        <p>Pribadi melankolis adalah perfeksionis, analitis, dan detail. Mereka suka merencanakan dengan matang dan punya prinsip hidup kuat. Melankolis cenderung sensitif, introvert, dan sangat peduli pada kualitas dan standar. Namun, mereka rawan merasa khawatir dan sulit melepas kesalahan.</p>
+        <ul>
+          <li><strong>Kelebihan:</strong> Teliti, bertanggung jawab, setia.</li>
+          <li><strong>Kekurangan:</strong> Mudah cemas, pemilih, cenderung perfeksionistis berlebihan.</li>
+        </ul>
+      `,
+      P: `
+        <h3>Plegmatis</h3>
+        <p>Tipe plegmatis dikenal sebagai pribadi yang tenang, sabar, dan penyabar. Mereka suka menghindari konflik dan mudah berempati. Plegmatis adalah pendengar yang baik, dapat diandalkan, dan menjaga harmonis hubungan. Namun, mereka sering menghindar membuat keputusan dan cenderung pasif.</p>
+        <ul>
+          <li><strong>Kelebihan:</strong> Penyabar, diplomatis, konsisten.</li>
+          <li><strong>Kekurangan:</strong> Kurang tegas, sulit berubah, terkadang kurang motivasi.</li>
+        </ul>
+      `
+    };
+
+    let summaryText;
+    if(types.length === 1) {
+      summaryText = `<strong>Kepribadian dominan Anda adalah tipe <em>${types[0]}</em>.</strong><br>${detailedDescriptions[types[0]]}`;
+    } else {
+      summaryText = `<strong>Kepribadian dominan Anda adalah gabungan dari beberapa tipe:</strong><br>`;
+      summaryText += types.map(t => `<section>${detailedDescriptions[t]}</section>`).join('<hr style="margin:1rem 0; border:none; border-top:1px solid #ccc;">');
+    }
+    return summaryText;
+  }
+
+  submitBtn.addEventListener('click', () => {
+    animateButton(submitBtn);
+    const score = calculateResults();
+    if(!score) return;
+    scoreSanguinis.textContent = `Sanguinis: ${score.S} poin`;
+    scoreKoleris.textContent = `Koleris: ${score.K} poin`;
+    scoreMelankolis.textContent = `Melankolis: ${score.M} poin`;
+    scorePlegmatis.textContent = `Plegmatis: ${score.P} poin`;
+
+    summary.innerHTML = interpretResults(score);
+
+    resultSection.style.display = 'block';
+    resultSection.scrollIntoView({behavior: "smooth"});
+  });
+});
+</script>
+</body>
+</html>
+
